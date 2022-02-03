@@ -1,0 +1,124 @@
+<html>
+<head><title>Session Time Out</title>
+<script>
+
+var t;
+var activeTime;
+var userOpenChatBot=false;
+var warningCountdown;
+var idleSeconds = 60; /* After how long idle time do we log out user? */
+var warningSeconds = 60; /* After how long idle time do we start the warning countdown? */
+var wMilliSeconds = 5000;
+
+var lastMessageTime=Date.now();
+
+function sessionExpiration() {
+
+  window.onload = resetTimer; /* Window is refreshed. */
+  window.onmousemove = resetTimer; /* Mouse is moved. */
+  window.onkeypress = resetTimer; /* Key is pressed. */
+  window.onmousedown = resetTimer; /* Touchscreen is pressed. */
+  window.onclick = resetTimer; /* Touchpad clicks. */
+  window.onscroll = resetTimer; /* Scrolling with arrow keys. */
+
+  warning(idleSeconds, warningSeconds);
+
+}
+
+function warning(idleSeconds, warningSeconds) {
+  var bannerDisplay = setTimeout(function(){
+  }, 100); /* In Firefox opacity isn't taken into account before the page and div load. Without this the banner would flicker upon page load. */
+  var warningStart = setTimeout(function(){
+
+  }, 1100); /* Without this, warning div would appear before the text. */
+  var remaining = idleSeconds - warningSeconds;
+  warningCountdown = setInterval(function() { /* Runs every 1 second. */
+    var browserActive = parseInt(localStorage.getItem('activeTime')); /* In case other tab has been active more recently. */
+    if(remaining <= 0) {
+      logout();
+    } else if(activeTime != browserActive) { /* Then another tab has been active more recently than this tab. */
+      activeTime = browserActive; /* Since another tab was most recently used, we do not record a new timestamp here too. */
+      resetTimer(false);
+    } else {
+      remaining--;
+    }
+  }, 1000);
+}
+
+function clearEverything() {
+  clearTimeout(t);
+  clearInterval(warningCountdown);
+
+}
+function recordTime() {
+  activeTime = Date.now(); /* Milliseconds since 1970/01/01. */
+  localStorage.setItem('activeTime', activeTime);
+}
+function logout() {
+var diffMin = (Date.now()-lastMessageTime)/ 60000;
+diffMin = parseFloat(diffMin).toFixed(2);
+console.log('diffMin: '+ diffMin);
+if(userOpenChatBot && diffMin > 1){
+  setTimeout(()=>{
+      window.Avaamo.logout();
+    },1000);
+      //var elementA = document.getElementById("sessionscript");
+      //elementA.remove();
+      setTimeout(()=>{
+        Avaamo.addFrame();
+        window.Avaamo.openChatBox();
+        //var AvaamoChatBot=function(t){function o(t,o){var n=document.createElement("script");n.setAttribute("src",t),n.setAttribute("id","sessionscript"),n.onload=o,document.body.appendChild(n)}return this.options=t||{},this.load=function(t){o(this.options.url,function(){window.Avaamo.addFrame(),t&&"function"==typeof(t)&&t(window.Avaamo)})},this};
+        //var chatBox = new AvaamoChatBot({url: 'https://c6.avaamo.com/web_channels/c1c85cf3-e0f8-442c-b418-fccbbfb8de66?action=demo&controller=web_channels&demo=true'});
+        //chatBox.load(function(avaamo) {window.Avaamo.openChatBox();});
+        lastMessageTime=Date.now();
+      },2000);
+}
+
+}
+function synchTab() {
+  return Date.now() - parseInt(localStorage.getItem('activeTime'));
+}
+function resetTimer(newTimestamp = true) {
+  clearEverything();
+  if(newTimestamp) { /* Meaning this function is called due the user interacting with the current tab. We don't want to record a new timestamp when this function is called due to interaction with some other tab. */
+    var delay = 0;
+    recordTime(); /* Records across all tabs in browser. Meaning: Activity on another tab affects this tab too. */
+  } else { /* No need to synch on the tab we currently interact with, since it's timestamp is the baseline. */
+    var delay = synchTab(); /* We want to synch the timers on all tabs, so their clocks update exactly simultaneously. It usually works, but some little bug might exist that sometimes causes some tabs to have a second or two difference. */
+  }
+  /* When user has been idle "warningSeconds" number of seconds, we display warning and countdown. */
+  t = setTimeout(function(){ warning(idleSeconds, warningSeconds); }, wMilliSeconds - delay);
+}
+
+</script>
+
+</head>
+<body onload="sessionExpiration()">
+  <div id="sessExpirDiv"></div>
+Welcome to Session Time out example
+
+<script type="text/javascript">
+  var AvaamoChatBot=function(t){function o(t,o){var n=document.createElement("script");n.setAttribute("src",t),n.setAttribute("id","sessionscript"),n.setAttribute("id","avm-web-channel"),n.onload=o,document.body.appendChild(n)}return this.options=t||{},this.load=function(t){o(this.options.url,function(){window.Avaamo.addFrame(),t&&"function"==typeof(t)&&t(window.Avaamo)})},this};
+    var chatBox = new AvaamoChatBot({url: 'https://c6.avaamo.com/web_channels/c1c85cf3-e0f8-442c-b418-fccbbfb8de66?action=demo&controller=web_channels&demo=true'});
+
+  chatBox.load(function(avaamo) {
+    Avaamo.onChatBoxOpen=()=>{
+          userOpenChatBot=true;
+          resetTimer(true);
+          lastMessageTime=Date.now();
+        };
+        Avaamo.onChatBoxClose=()=>{
+          resetTimer(true);
+          userOpenChatBot=true;
+        };
+        avaamo.onBotMessage = (message) => {
+          //console.log(message);
+          resetTimer(true);
+          lastMessageTime=Date.now();
+        };
+
+  });
+
+</script>
+</body>
+</html>
