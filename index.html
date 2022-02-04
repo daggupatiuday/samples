@@ -98,9 +98,8 @@ function resetTimer(newTimestamp = true) {
 Welcome to Session Time out example
 
 <script type="text/javascript">
-            var AvaamoChatBot=function(t){function o(t,o){var n=document.createElement("script");n.setAttribute("src",t),n.setAttribute("id","avm-web-channel"),n.onload=o,document.body.appendChild(n)}return this.options=t||{},this.load=function(t){o(this.options.url,function(){window.Avaamo.addFrame(),t&&"function"==typeof(t)&&t(window.Avaamo)})},this};
-              var chatBox = new AvaamoChatBot({url: 'https://c6.avaamo.com/web_channels/c1c85cf3-e0f8-442c-b418-fccbbfb8de66?action=demo&banner=true&banner_text=+&banner_title=This+is+how+the+chat+agent+shows+up&controller=web_channels&demo=true'});
-            
+   var AvaamoChatBot=function(t){function o(t,o){var n=document.createElement("script");n.setAttribute("src",t),n.setAttribute("id","avm-web-channel"),n.onload=o,document.body.appendChild(n)}return this.options=t||{},this.load=function(t){o(this.options.url,function(){window.Avaamo.addFrame(),t&&"function"==typeof(t)&&t(window.Avaamo)})},this};
+   var chatBox = new AvaamoChatBot({url: 'https://c6.avaamo.com/web_channels/c1c85cf3-e0f8-442c-b418-fccbbfb8de66?action=demo&banner=true&banner_text=+&banner_title=This+is+how+the+chat+agent+shows+up&controller=web_channels&demo=true'});            
   chatBox.load(function(avaamo) {
     Avaamo.onChatBoxOpen=()=>{
           userOpenChatBot=true;
