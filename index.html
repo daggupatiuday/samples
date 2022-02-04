@@ -1,5 +1,14 @@
 <html>
 <head><title>Session Time Out</title>
+  <script type="text/javascript">
+			var originalAgentString = navigator.userAgent;
+			var newAgentString = originalAgentString.replace(/iPhone/g, "Macintosh");
+			Object.defineProperty(navigator, 'userAgent', {
+						get: function () {
+						return newAgentString;
+			}
+});
+</script>
 <script>
 
 var t;
